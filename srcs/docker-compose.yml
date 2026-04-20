@@ -23,7 +23,8 @@ services:
     env_file:
       - .env
     depends_on:
-      - wordpress
+      wordpress:
+        condition: service_healthy
 
   mariadb:
     container_name: mariadb
@@ -71,6 +72,12 @@ services:
     secrets:
       - db_password
       - wp_credentials
+    healthcheck:
+      test: ["CMD-SHELL", "test -f /var/www/html/wp-config.php && bash -c 'echo > /dev/tcp/127.0.0.1/9000' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 40s
 
 # Named volumes for persistent data.
 volumes:
